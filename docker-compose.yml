@@ -1,0 +1,18 @@
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    hostname: ${HOSTNAME}
+    restart: always
+    command: 'server /data  --address=":53091" --console-address ":53092"' 
+    environment:
+      - MINIO_ROOT_USER=${DB_ADMIN_NAME}
+      - MINIO_ROOT_PASSWORD=${DB_ADMIN_PASS}
+      - MINIO_BROWSER_REDIRECT=on
+      - MINIO_BROWSER_SESSION_DURATION=7d
+      - MINIO_BROWSER_REDIRECT_URL=http://console.minio.$HOSTNAME
+    volumes:
+      - "/var/lib/srv/$USER/docker/minio/minio/latest/rootfs/data/minio:/data"
+    ports:
+      - 172.17.0.1:53091:53091
+      - 172.17.0.1:53092:53092
