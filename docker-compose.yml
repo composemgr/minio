@@ -1,0 +1,42 @@
+name: minio
+services:
+  server:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    hostname: minio
+    restart: always
+    command: 'server /data --address=":9000" --console-address ":53091"'
+    environment:
+      - MINIO_ROOT_USER=${APP_ADMIN_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${APP_ADMIN_PASS:-adminpasswd}
+      - MINIO_REGION_NAME=us-east-1
+      - MINIO_BROWSER_SESSION_DURATION=7d
+      - MINIO_BROWSER_REDIRECT=on
+      - MINIO_BROWSER_REDIRECT_URL=https://console.${BASE_DOMAIN_NAME}
+    volumes:
+      - '/var/lib/srv/$USER/docker/minio/minio/latest/rootfs/data/minio:/data'
+    ports:
+      - 172.17.0.1:53090:9000
+      - 172.17.0.1:53091:53091
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-q',
+          '-Ssf',
+          'http://localhost:53091/minio/health/live',
+        ]
+      interval: 3s
+      retries: 12
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+    networks:
+      - minio
+
+networks:
+  minio:
+    name: minio
+    external: false
