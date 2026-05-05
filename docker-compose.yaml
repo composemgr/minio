@@ -28,7 +28,7 @@ services:
       - '172.17.0.1:53090:9000'
       - '172.17.0.1:53091:53091'
     volumes:
-      - './rootfs/data/minio:/data'
+      - './volumes/data/minio:/data'
     healthcheck:
       test:
         [
