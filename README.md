@@ -47,7 +47,7 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/data/minio` - Data storage
+- `./volumes/data/minio` - Data storage
 
 ## 🔐 Security
 
