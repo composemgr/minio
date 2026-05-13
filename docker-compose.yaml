@@ -9,37 +9,31 @@ x-logging: &default-logging
 
 services:
   app:
-    image: casjaysdevdocker/minio:latest
+    image: minio/minio:latest
     container_name: minio-app
     hostname: ${BASE_HOST_NAME:-$HOSTNAME}
     restart: always
     pull_policy: always
-    command: 'server /data --address=":9000" --console-address ":53091"'
+    command: 'server /data --address=":9000" --console-address ":9001"'
     logging: *default-logging
     environment:
-      MINIO_BROWSER_REDIRECT: on
       TZ: ${TZ:-America/New_York}
-      MINIO_REGION_NAME: us-east-1
+      MINIO_BROWSER_REDIRECT: on
+      MINIO_REGION: us-east-1
       MINIO_BROWSER_SESSION_DURATION: 30d
       MINIO_ROOT_USER: ${APP_ADMIN_USER:-administrator}
       MINIO_ROOT_PASSWORD: ${APP_ADMIN_PASS:-changeme_admin_password}
-      MINIO_BROWSER_REDIRECT_URL: https://console.${BASE_HOST_NAME:-$HOSTNAME}
+      MINIO_BROWSER_REDIRECT_URL: https://console.${BASE_DOMAIN_NAME:-example.com}
     ports:
       - '172.17.0.1:53090:9000'
-      - '172.17.0.1:53091:53091'
+      - '172.17.0.1:53091:9001'
     volumes:
       - './volumes/data/minio:/data'
     healthcheck:
-      test:
-        [
-          'CMD',
-          'curl',
-          '-q',
-          '-LSsf',
-          'http://localhost:53091/minio/health/live',
-        ]
-      interval: 3s
-      retries: 12
+      test: ['CMD', 'mc', 'ready', 'local']
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - minio
 
