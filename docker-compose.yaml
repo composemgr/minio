@@ -18,6 +18,8 @@ services:
     logging: *default-logging
     environment:
       TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: minio-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
       MINIO_BROWSER_REDIRECT: on
       MINIO_REGION: us-east-1
       MINIO_BROWSER_SESSION_DURATION: 30d
@@ -36,8 +38,30 @@ services:
       retries: 3
     networks:
       - minio
+      - proxy
+      - cloudflare
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://minio-app:9001'
+      - 'cloudflare.hostname=minio.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.minio-app.entrypoints=http'
+      - 'traefik.http.routers.minio-app-secure.tls=true'
+      - 'traefik.http.routers.minio-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.minio-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.minio-app.middlewares=minio-app-https-redirect'
+      - 'traefik.http.routers.minio-app-secure.entrypoints=https'
+      - 'traefik.http.routers.minio-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.minio-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.minio-app-secure.service=minio-app'
+      - 'traefik.http.services.minio-app.loadbalancer.server.port=9001'
 
 networks:
   minio:
     name: minio
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
