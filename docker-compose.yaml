@@ -20,7 +20,7 @@ services:
       TZ: ${TZ:-America/New_York}
       CONTAINER_NAME: minio-app
       HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
-      MINIO_BROWSER_REDIRECT: on
+      MINIO_BROWSER: on
       MINIO_REGION: us-east-1
       MINIO_BROWSER_SESSION_DURATION: 30d
       MINIO_ROOT_USER: ${APP_ADMIN_USER:-administrator}
